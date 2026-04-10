@@ -844,11 +844,15 @@ cursorAdapterTestLayer("CursorAdapterLive", (it) => {
       );
       assert.isAbove(setConfigRequests.length, 0, "should call session/set_config_option");
       assert.equal((setConfigRequests[0]?.params as Record<string, unknown>)?.value, "composer-2");
-      const lastSetConfig = setConfigRequests[setConfigRequests.length - 1];
-      assert.equal(
-        (lastSetConfig?.params as Record<string, unknown>)?.value,
-        "composer-2[fast=true]",
+
+      const fastConfigRequests = requests.filter(
+        (entry) =>
+          entry.method === "session/set_config_option" &&
+          (entry.params as Record<string, unknown> | undefined)?.configId === "fast",
       );
+      assert.isAbove(fastConfigRequests.length, 0, "should apply fast mode as a separate config");
+      const lastFastConfig = fastConfigRequests[fastConfigRequests.length - 1];
+      assert.equal((lastFastConfig?.params as Record<string, unknown>)?.value, "true");
 
       yield* adapter.stopSession(threadId);
     }),

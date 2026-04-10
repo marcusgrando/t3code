@@ -531,6 +531,16 @@ it.layer(Layer.mergeAll(NodeServices.layer, ServerSettingsService.layerTest()))(
                   }
                   return { stdout: "", stderr: "spawn ENOENT", code: 1 };
                 }
+                if (joined === "about --format json") {
+                  return {
+                    stdout: JSON.stringify({
+                      cliVersion: "2026.04.09-f2b0fcd",
+                      userEmail: null,
+                    }),
+                    stderr: "",
+                    code: 0,
+                  };
+                }
                 if (joined === "about") {
                   return { stdout: "", stderr: "spawn ENOENT", code: 1 };
                 }
