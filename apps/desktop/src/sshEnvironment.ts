@@ -65,8 +65,8 @@ interface DesktopSshEnvironmentManagerOptions {
 const NO_HOSTS = [] as const;
 
 function stripInlineComment(line: string): string {
-  const hashIndex = line.indexOf("#");
-  return (hashIndex >= 0 ? line.slice(0, hashIndex) : line).trim();
+  const trimmed = line.trim();
+  return trimmed.startsWith("#") ? "" : trimmed;
 }
 
 function splitDirectiveArgs(value: string): ReadonlyArray<string> {

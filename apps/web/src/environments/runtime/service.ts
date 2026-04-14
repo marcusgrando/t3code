@@ -1079,7 +1079,7 @@ async function ensureSavedEnvironmentConnection(
         const isAuthError = activeRecord.desktopSsh
           ? isSshHttpAuthError(error, 401)
           : isRemoteEnvironmentAuthHttpError(error) && error.status === 401;
-        if (!isAuthError) {
+        if (!isAuthError || !activeRecord.desktopSsh) {
           throw error;
         }
 
