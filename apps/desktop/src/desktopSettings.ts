@@ -7,11 +7,13 @@ import { resolveDefaultDesktopUpdateChannel } from "./updateChannels";
 export interface DesktopSettings {
   readonly serverExposureMode: DesktopServerExposureMode;
   readonly updateChannel: DesktopUpdateChannel;
+  readonly updateChannelConfiguredByUser: boolean;
 }
 
 export const DEFAULT_DESKTOP_SETTINGS: DesktopSettings = {
   serverExposureMode: "local-only",
   updateChannel: "latest",
+  updateChannelConfiguredByUser: false,
 };
 
 export function resolveDefaultDesktopSettings(appVersion: string): DesktopSettings {
@@ -37,12 +39,11 @@ export function setDesktopUpdateChannelPreference(
   settings: DesktopSettings,
   requestedChannel: DesktopUpdateChannel,
 ): DesktopSettings {
-  return settings.updateChannel === requestedChannel
-    ? settings
-    : {
-        ...settings,
-        updateChannel: requestedChannel,
-      };
+  return {
+    ...settings,
+    updateChannel: requestedChannel,
+    updateChannelConfiguredByUser: true,
+  };
 }
 
 export function readDesktopSettings(settingsPath: string, appVersion: string): DesktopSettings {
@@ -57,15 +58,22 @@ export function readDesktopSettings(settingsPath: string, appVersion: string): D
     const parsed = JSON.parse(raw) as {
       readonly serverExposureMode?: unknown;
       readonly updateChannel?: unknown;
+      readonly updateChannelConfiguredByUser?: unknown;
     };
+    const parsedUpdateChannel =
+      parsed.updateChannel === "nightly" || parsed.updateChannel === "latest"
+        ? parsed.updateChannel
+        : null;
+    const updateChannelConfiguredByUser = parsed.updateChannelConfiguredByUser === true;
 
     return {
       serverExposureMode:
         parsed.serverExposureMode === "network-accessible" ? "network-accessible" : "local-only",
       updateChannel:
-        parsed.updateChannel === "nightly" || parsed.updateChannel === "latest"
-          ? parsed.updateChannel
+        updateChannelConfiguredByUser && parsedUpdateChannel !== null
+          ? parsedUpdateChannel
           : defaultSettings.updateChannel,
+      updateChannelConfiguredByUser,
     };
   } catch {
     return defaultSettings;

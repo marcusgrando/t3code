@@ -36,6 +36,7 @@ describe("desktopSettings", () => {
     expect(resolveDefaultDesktopSettings("0.0.17-nightly.20260415.1")).toEqual({
       serverExposureMode: "local-only",
       updateChannel: "nightly",
+      updateChannelConfiguredByUser: false,
     });
   });
 
@@ -45,11 +46,13 @@ describe("desktopSettings", () => {
     writeDesktopSettings(settingsPath, {
       serverExposureMode: "network-accessible",
       updateChannel: "latest",
+      updateChannelConfiguredByUser: true,
     });
 
     expect(readDesktopSettings(settingsPath, "0.0.17")).toEqual({
       serverExposureMode: "network-accessible",
       updateChannel: "latest",
+      updateChannelConfiguredByUser: true,
     });
   });
 
@@ -59,12 +62,14 @@ describe("desktopSettings", () => {
         {
           serverExposureMode: "local-only",
           updateChannel: "latest",
+          updateChannelConfiguredByUser: false,
         },
         "network-accessible",
       ),
     ).toEqual({
       serverExposureMode: "network-accessible",
       updateChannel: "latest",
+      updateChannelConfiguredByUser: false,
     });
   });
 
@@ -74,12 +79,14 @@ describe("desktopSettings", () => {
         {
           serverExposureMode: "local-only",
           updateChannel: "latest",
+          updateChannelConfiguredByUser: false,
         },
         "nightly",
       ),
     ).toEqual({
       serverExposureMode: "local-only",
       updateChannel: "nightly",
+      updateChannelConfiguredByUser: true,
     });
   });
 
@@ -97,6 +104,44 @@ describe("desktopSettings", () => {
     expect(readDesktopSettings(settingsPath, "0.0.17-nightly.20260415.1")).toEqual({
       serverExposureMode: "local-only",
       updateChannel: "nightly",
+      updateChannelConfiguredByUser: false,
+    });
+  });
+
+  it("migrates legacy implicit stable settings to nightly when running a nightly build", () => {
+    const settingsPath = makeSettingsPath();
+    fs.writeFileSync(
+      settingsPath,
+      JSON.stringify({
+        serverExposureMode: "local-only",
+        updateChannel: "latest",
+      }),
+      "utf8",
+    );
+
+    expect(readDesktopSettings(settingsPath, "0.0.17-nightly.20260415.1")).toEqual({
+      serverExposureMode: "local-only",
+      updateChannel: "nightly",
+      updateChannelConfiguredByUser: false,
+    });
+  });
+
+  it("preserves an explicit stable choice on nightly builds", () => {
+    const settingsPath = makeSettingsPath();
+    fs.writeFileSync(
+      settingsPath,
+      JSON.stringify({
+        serverExposureMode: "local-only",
+        updateChannel: "latest",
+        updateChannelConfiguredByUser: true,
+      }),
+      "utf8",
+    );
+
+    expect(readDesktopSettings(settingsPath, "0.0.17-nightly.20260415.1")).toEqual({
+      serverExposureMode: "local-only",
+      updateChannel: "latest",
+      updateChannelConfiguredByUser: true,
     });
   });
 });
