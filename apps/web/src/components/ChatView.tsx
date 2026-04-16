@@ -3042,7 +3042,7 @@ export default function ChatView(props: ChatViewProps) {
           },
         });
       })
-      .catch(async (err: unknown) => {
+      .catch((err: unknown) => {
         toastManager.add({
           type: "error",
           title: "Could not start implementation thread",
